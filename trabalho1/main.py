@@ -1,7 +1,29 @@
-ASCII_LETTER_A_LOWERCASE = 97
+ASCII_LETTER_A_LOWERCASE = 97 # OFFSET
 ALPHABET_LENGTH = 26
 
 SEQUENCE_LENGTH = 3
+
+ALPHABET = [chr(letter) for letter in range(97, 97+26)]
+
+PORTUGUESE_LETTERS_WITH_ACCENT = {
+  'à': 'a',
+  'á': 'a',
+  'ã': 'a',
+  'â': 'a',
+  'é': 'e',
+  'è': 'e',
+  'ê': 'e',
+  'í': 'i',
+  'ì': 'i',
+  'î': 'i',
+  'ó': 'o',
+  'ò': 'o',
+  'ô': 'o',
+  'ú': 'u',
+  'ù': 'u',
+  'û': 'u',
+  'ç': 'c',
+}
 
 FREQUENCY_ALPHABET_ENGLISH = {
   'a': 8.167,
@@ -83,8 +105,7 @@ def decryptography_letter(cyphertext_letter, keystream_letter):
   cyphertext_letter = convert_letter_from_ascii(cyphertext_letter)
   keystream_letter = convert_letter_from_ascii(keystream_letter)
 
-  decyphered_letter = (cyphertext_letter -
-             keystream_letter) % ALPHABET_LENGTH
+  decyphered_letter = (cyphertext_letter - keystream_letter) % ALPHABET_LENGTH
 
   return chr(decyphered_letter + ASCII_LETTER_A_LOWERCASE)
 
@@ -155,23 +176,107 @@ def map_possible_keys(sequence_frequency):
 
   return sorted(possible_keys.items(), reverse=True, key=lambda kv: (kv[1], kv[0]))
 
+def get_cyphertext_frequency_alphabet(cyphertext, key_length):
+  percentage = []
+  frequency = []
+
+  for i in range(key_length):
+    frequency.append(dict([(letter, 0) for letter in ALPHABET])) # frequency alphabet empty
+
+    for j in range(i, len(cyphertext), key_length):
+      frequency[i][cyphertext[j]] += 1
+    
+    percentage.append({})
+
+    total_size = sum(frequency[i].values())
+    
+    for letter in ALPHABET:
+      percentage[i][letter] = round((frequency[i][letter] * 100)/total_size, 3)
+
+  return percentage
+
 def break_cipher(cyphertext):
+  cyphertext = cyphertext.lower().replace(';', '')
+
   sequence_frequency = map_sequence_frequency(cyphertext, SEQUENCE_LENGTH)
   possible_keys = map_possible_keys(sequence_frequency)
 
-  most_likely_key = possible_keys[0][0]
-
-  print(sequence_frequency)
-  print(fator_number(150))
   print(possible_keys)
-  print(most_likely_key)
 
-  # PARTE 2
+  key_length = 6
+
+  cyphertext_frequency_alphabet = get_cyphertext_frequency_alphabet(cyphertext, key_length)
+  
+  for e in cyphertext_frequency_alphabet:
+    print(e)
+    print()
+
+  alphabet_shift = [5, 18, 24, 7, 12, 9]
+
+  cyphertext = list(cyphertext)
+  for i in range(key_length):
+    for j in range(i, len(cyphertext), key_length):
+      cyphertext[j] = chr(((ord(cyphertext[j]) - ASCII_LETTER_A_LOWERCASE + alphabet_shift[i]) % ALPHABET_LENGTH) + ASCII_LETTER_A_LOWERCASE)
+
+  # print(''.join(cyphertext))
+
+  # ANOTAR NO RELATÓRIO: se o texto tivesse espaçamento e caracteres não criptografdos, isso facilitaria para quem está vendo...
+
+def tmp():
+  s = ''
+
+  while True:
+    try:
+      s += input()
+    except:
+      break
+  
+  return s
+
+def get_example_text_english():
+  arquivo = open('little_prince_english.txt', 'r')
+
+  text = ''.join(arquivo.readlines())
+
+  arquivo.close()
+
+  cleaned_text = ''
+  for c in text.lower():
+    if c in ALPHABET:
+      cleaned_text += c
+    elif c in PORTUGUESE_LETTERS_WITH_ACCENT:
+      cleaned_text += PORTUGUESE_LETTERS_WITH_ACCENT[c]
+
+  return cleaned_text
+
+def get_example_text_portuguese():
+  arquivo = open('pequeno_principe_português.txt', 'r', encoding='utf8')
+
+  text = ''.join(arquivo.readlines())
+  
+  arquivo.close()
+
+  cleaned_text = ''
+  for c in text.lower():
+    if c in ALPHABET:
+      cleaned_text += c
+    elif c in PORTUGUESE_LETTERS_WITH_ACCENT:
+      cleaned_text += PORTUGUESE_LETTERS_WITH_ACCENT[c]
+
+  return cleaned_text
 
 def main():
   # test('victorchato', 'nathalialegal')
   # break_cipher('iivaockhlxu')
-  break_cipher('GwtxazkawfrfgwtlwkvugmqfiagvhvocttrzkquvwebmnbhMzavbplgcozfrqqftqfiagjirouclgrzbxxvzxcntQlmidbhlmakmodzbobjzoigyscdacewhpioiscgmpmsjlcgWcezkgmhvhxqkarnacGiexmixgkvaubhrhmvhftdvqgocdywxhMzavbplgcofwfmkkiicqqptfmzpkvicvctgozidqeikkivysihmpmidnmoLsuqqvtsdzbwlwdkmtwwvouczbrvkenajvvxxvzxcntDyvagezlnmwtzzlcgmblgtcWcezkqkbrmmhxzzndkmovqmnbhsdjggrlhuqezznVwezrnqvtavouqesjoqgxffnKttgvmivgiexzjhbtpawmhidavbelzvqgafgmumwvpbpnzcvMvbodkcnowevzotiidaxbhrzvgjivdurxfudmvtqtjvfbavibwfzzwmthicozkvsjIioosclccfokhiigovgmkyseywtgoizmvthedanIscgmpmsjlcgfoczawtrrjlkhwukctngjjlcesjdvnnqkpavnfgdantcizmvLijkmpwwjnmphbwztklavocuOwmvuwljvnbkuicpuikomdlcxfrovqgarobklGvyxtxhzpuvnfgdakwqfilkfseocoyslbqcmDijqplcuvtglsldaohrkztnngjzlehbjzkvxhlmMvbodwqdxbupuoxhlnvqgblikotlzhcuoickcvthvKmneseomujivgwdhfkdanbpvmwpxqgjzvtafgmumwvKmneseomujivdienzznaciwviievidnipwwrhxqkhrvbxxvzxcntbzntehadjlqGicgiotitowtkvfikwlrfgwtlwkvugmarobklWeomixfgjzvtpzwmpwidgqinzrvkcewhpmvfskpavkwjoqsnsziMvbodlckljvnbkuicpuxxzzoDglhzwcnnaribgbdjpurkwddakgtrpkkuijjzebzlxbwlskptvkwtzarhglzzgvisdtktqlmig;NhgjzvmwkjznhpfmbklcixqxxzjvokmhznCvxhjpaebdzompbavbmvizrxmtthddVwgqvpnkgwspautdzzvSnwjlcgjiznrwlhfvcemciznhbqzoctfojnisnwjptvkwtdmuiiipaEkojwtcgrzoinbelvucghvdvhbbzwcuIvrnmneijniibhkdapbgcnirbsevkqgrzhmpmidiqdadlgdkgoizcQkqzqitbijiivhelzxggokdjwlskhiigwjyquioioctbseouqghvnvclqvoctkwudkweijhcuTzzlccfglnkkiwknwftzvnxwkijdlvxagjznxqkpauxagzzsnwjIioeotpafbodamwzwromwgiexagwqfhuqwctjvuxelvbpxelzAwldvilklgvbzcowuvxjtfvozceotpakgolxbqkzvjzjhbtpacmArpzklqfiagjiroipmsrozwmflhinbelvuuxaapavhqfilkfseocoesflcklwdkmtwwvoiwzivyqcfskvvvxQivawezrhkqkdvmiwzivjzebJzqionggjzvmwkjzobrfgwtximptrnhromvhfkjzutuzobklgzoioxhDvmexbrnjkuseycooscdbwmafgtklpcvvfbhvstkusijuqesjoqggwjdievcenmsnokvzenolbcgtbvlcgFolmqulsdmqunggcitxhivqftbkzywbgipbtnacvwtxskoctiwjIcneojvokmhzncvfwejvrkskdcoJiznywxjzoigtqtpuutbmztkmjvgxgezvibglelzagfTlnkgnzkmqexghpioxigztnxbkzasnsdvfkfijztkmbvlcglcuvtglelvuubhrhmvvceyqoxbkpuotgjvwtvwzibqkhfmWtvwmvzkngevbqjivkmpthzwcuxhdvopbgudartfkpzkxbkhwpmsjiiuvskpztbrzxcnngdpaPnbtvcemcimqungmdbcxflozwfhvhxwlZfmmobdjpufhzfmakmodzbehbjzkvxhlmifbdznkkguvgqvWcezkrhfkvctgokzurngczwfbuedaubaezkwezrhkqkdvmdgewkgwdhfkdaXbjrhcuviincueitocuewxptcnhkmqumwhpmCxbvvvvxagjzwmzvxbwlgzoioxhyzvfksidbUnggzvfbgjzievidnipgwscbwkdzndgeqfiagjiroctgojxmnxfznywxwuXcttpzoctxuvobgezlnywtaUjvgvbvxlkvhlhmnbhEptntflozwfzrxcugcezvkfqfiowxjfgcviokYcklavocuhftdkqgulzqpuwszvfnahpqunzkmqexglotqksdAcuvsedaklsdnkgesidasnsrokqgrzhmpmidzcnhpfmbklskamnbgZincvwcdakloeomubhrhmvestocunzkmqebsjdlvxagjzpxelzmwbgdjlFnwjniibhkdahxzznagwarbvciciobkmcilcklqfiagvhvoctmscgcutqtpuutbWpaextrpkkuijnmfecizuxxzjxmnxfznywxArzkggojdvvxfupuoxhlnywtamdbcxdfmbvbhfmagfpzwmpwidzcKghvbmtxiczwfhzfmLwbgjzlohzcdaotgjvXttsjzvvtgtztgkwjlcgoscdbwmjlgxwmokzywtaZibgzsipbnbulgigmarnacvceqinewjkzgmwlhmwbrvsKwkosdbwkokxwplshpivesfQqxtalnvqgdvgtgghvnywxbzntpxqjxmnxfznywxzrxcuGiexmnxwwzvfbotptklfznculwkvugmfyjvengvsxwejziitjiznDkoodpagzskpzptwrxcnbgvgmoxbkpuqwwfqmntitowtxlCjzgfwgncowccjzubhrhmvvcenmemskpzcwwgdaebbxztkmEldasnsmzavbplgcogshpmkwrzxbwftziqdngdvctbgedanvcdhwfhzvxbwlgvylkzbznakfelvuqkqzimefwHpqujivdluxagzznbpvmwWmdcvkgkokicneokdvebrlibgewkaiebzznquoccpbrthUpqumsdkcuysihmpmidamnbgvomnxwwzvfFovxmptgjdbcfskomneijnqvtavotkzicvucesjpiftrzxbwfslvkgqJzqiongviqofolmquvcdhwfhsxzbfhzfmqfifvoqwftrxqnbgznwtvwRzvgtbrgqsnodnirbselccfwuaqpbplnbqkhfmntbbxdtntotVtkjirhxqlivmmgngrkqggsknwftzvnKwkosdbwksxzbtbglnbgezlnMvbodnqvtavomnbhwvkkewjdavxzcpaxxbviivbgtjvuxqkzbwkokvkpbpyYwpxqdjtnbgromumweozklhzlcgOwmvuwlsijagqdvgtgghvnywxbfixwkijvnkgwspawehidkglolbcgViivjkmiigiebbzvvklzvotkzicvzjhbtpaxbhrzlciwspanxqkpagzsjoiuFolmqubbgjawxfvhiigoUjvgvjvgtwvhlnbgezlnLqgstqqxxfivtqksdzcxnzgpbcmsrpkvhfGmwkgikywnhfzytgvhlnxqkhkdbqksldaohrMddcfijpbkiglhkqggvlccmhvhxqkolbcgoscmcvkidecumcJzlrhfkoqvhfviqobbedanfokoquxzvdnggrEvuctqtpuutbepveIffdvwehidkkxgjzucnqkjzvnfgdauhzcdkkmiudvkgocdywtacvkwlqfiagvhvoctViivjkmiiywnhfdvautzrjzgxhrywnhfrxbkgqzycpmhvhxwlsoNmflwkvugmfzncujiznitvijvokmhznjntbudbKgbznqxxzzoxjtfvozcxhgcitxhivmwviincuoscicneoGciuxzcparhfkoqvhfvmivthgcitxhivbgfdlnDkoodpafbqkpucghvnmfmiikqunzkmqebsjqmumwsptwfJzqiongjxmnxfznywxzvxbwlslztkmicozkvwvnixtfzpagkcjkwunsizCvlwkvugmqfiowxsivbPnbthwnewjzzqlbvxbgfdlnagfdvmAgwjrmqwlocdoweojzluhrrgmuFovxmptgziucqwdpaobBlikfbuedaubakzurngzhxgkrzzbPnzcvkqgrzhmpmidzcgkokimetitowtYijxmehbjzywthdvbvbgcjzgfeldaothkdapnzcvievidnipgstKzcxgvibgmsivbubhrhmvbdjpurkskdcovceqinewjaiwvwspaubhrhmvbdjpuWmgzoioxhvmivowkvmvnfgdaqkbrmmvbbtdlwghUjvgvweptvkwtzapnzcvDglhzwcnnakdvebrlibgzskzzcmokqitbijLcklelzagfdvmctgoidawlbvxmhywtdbwkzrxcumwexqfnbkzogmRldahkwebqneowdvkuijqmjbqlgiCxbvvvcmgtztgkwjlcgxzzoAgwjvgmhywtdbwkoeomFnwjgiqksvotcvijdvntqlnngkavibwfjzoigivrmmvkocvkwldvgtgghvnywxBlikpnbtiquetvpokthjdbcfskgiengzyncnqzwcubotptklsoYwpxqrozklhzlcgewxptcxuvongnuzvboxhlnUcxqviiutzzlccfhlmxklokamtfseocoyfziokezrXcttpzoctxbzhdgewkhinxglvlcoschqxxzdvfkfijqcniikvbgmiikquOwmvuwlsovzensxzavtgjdbcfskhqcmglnkkiwkqmpxbroqugwjgQpmsxzzcnqkjzhtitdjwlrfgwtgstniibhkdanbulgihtitdjwlokIcpvocdywxhmjtwmdroxqlivmmKghvbmtnzcvuehfgzzuhzcdkkmiudvpbgzqqvtsgmmvbidIiolwkvugmoeomcmolbcgmwexqfnbkxwpoocgquLsuyqemidvkqkqzzcohzcdaPnzcvuuvsczzklelzvwezrvaciwvimixgkvawezrhkqkdvmQpfokoqufolmquttrpkkuijaiebzznquOwmvuwlgrbqvmwjyqcfikcmpwfvmqvfokoquxfroucnfznmixgkvanbpvmwubhrhmveofmmgmoixccghvqmnhftdLqgstiwpestocuoschiigocvkkgwrxwpoocgquvceyqoxbkpuphbezywxOvimcgicozkvsjhmvngjdbcfskzzcmvviltxfzodgeswaqebhlmmumicozkvsjYcklweoctiwjzcuxacjjqkhznzjhbtpakgskoctiwjIcneomdbcxbzwpcnqkjzgnwjhwffolmquthzikkwieoukFciwqrnflnlktauvxkuijqqvtsgptxbbrmvgvicozkvsjiwpgwjgDkoodpawmoeomktqlgqufokoqutbkztqucioquecsjzvbgzkawfEldasnsziiwzivhqPnbtdurxfudmvifvoqwfdlmcuecsjzvbgcvkkgwrPbungtdxkmsxzbpxelzqpbagzzfbskYcklpzwmpwidhiigozydwedloivxgrbqvmwjecumccjzgfpcvvfbhvmivlsukcnowevzlngkjtcvijvbnhfvhUqkpzdlxtfzpapxelzivvcenmsnoknirbseQmumwsptwftvmugghlhvwgqrowtmciozklhzlcglqvgmtbghpmEkojqqvtsvgqvwccjzRaojztnnglgbtbqzzaphbvsmweotdvktDijqplogdmpfoxiikfdvmlkxhvojntbudbcmtvmugghlhivhrzjUqkpzdlreotzzcmblikPnzcvlkvhlhtcvwedifbodvtcvwedipbpyVmpxoevkehbjzkvxhlmlwbokncuvwgdbotgjvXgezvibglelzmveotpaothkdagkcjgwdhfkdaehadjlqWcezkohzcdauvsczzklelzuczbrdvcnqkjzOhfsddgeiiiixxzzoDglhzwcnnadvtgliryiutuzobkloeomubhrhmvbotptklRfimelogdmpfskpadeoeyqvgcezzqljzoigxiznuqwswaqebhlmipmsEpvexffnlwbjzqmtkozydqeikkivlwkvugmzfwwtmwjzbkiglhQplsuzzcmqfiagjirolwbarsqongrgqsnodnmfecsjzvbgczwUxrjzlvxzcpacmbvlcgtzzlcgmzlxbwlOvimcgslicneoezkckqlvtkjivoaqezzxqvnrziiubhrhmvtbkzNwlqviqubzzbcntarsqongriqubwuhwnxgkdmcewhpmvtftpAgwdcvkgkokoctiwjzcreotzzcmswaqebhlmwtvwrpowxjlgxwmokzvkuvrxcnmfzxqgloeomnhfvhcvfwJzlvhfkjzotuevtwvhlnvgvdlgdkgoiqmpxbroqutqtpuutbriqubBlikuxagzzgmzzwmthwuomoiijQqxtalnncvwcdaklzfmmowwrhvqgqfilkfseocomiikquosezvcmwjqqvtsTmiuwwtocoxuvnbcliiiiphbwvkkewjdantqlnLqgstzbqkqziwpfolmqulccgqebhlyqpvcenmsnokqmnxuvobqkhfmKttgvbmvoscdbpnzcvKttglomtthjdbcfskhiulodvtgliryirnzmdvckbvxqfgshpmKghvbmteitoculogdmptqupqcewhpiovcebcgIffdvftdzwculsugqdxffdlrxzczvvxghpmKghvmlwfskhinxglvlcyodzacvoeomkiglhxtbaznqpyolxqdngDjzdbbfiugmijicpvWeomixfgjzvmwkjznbulgigzskiquedizbknajjtnbqzocfbbUjvgvqfidcezznmumsivbsnwjhizbalnlwbhidavbelzdgeGvynkgwspafhzfmmixhdvctbgfmvcksvgmkyseyUcxqviiuowmzzttbvlcgtbkzvgvsldao')
+  cleaned_text = get_example_text_english()
+  cleaned_text = get_example_text_portuguese()
+
+  #print(cleaned_text)
+
+  print(cleaned_text[:100])
+  print(cryptography(cleaned_text, 'victor')[:100])
+
+  break_cipher(cryptography(cleaned_text, 'victor'))
 
 if __name__ == '__main__':
   main()
