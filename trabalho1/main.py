@@ -1,7 +1,12 @@
+from operator import index
+
 ASCII_LETTER_A_LOWERCASE = 97 # OFFSET
 ALPHABET_LENGTH = 26
 
 SEQUENCE_LENGTH = 3
+
+INDEX_OF_COINCIDENCE_ENGLISH = 0.066833
+INDEX_OF_COINCIDENCE_PORTUGUESE = 0.077833
 
 ALPHABET = [chr(letter) for letter in range(97, 97+26)]
 
@@ -219,10 +224,12 @@ def get_current_shift(frequency_alphabet, language_frequency_alphabet):
 def break_cipher(cyphertext, language_frequency_alphabet):
   cyphertext = cyphertext.lower().replace(';', '')
 
-  sequence_frequency = map_sequence_frequency(cyphertext, SEQUENCE_LENGTH)
-  possible_keys = map_possible_keys(sequence_frequency)
+  # get_keyword_length(cyphertext)
 
-  print(possible_keys)
+  # sequence_frequency = map_sequence_frequency(cyphertext, SEQUENCE_LENGTH)
+  # possible_keys = map_possible_keys(sequence_frequency)
+
+  # print(possible_keys)
 
   key_length = 6
 
@@ -344,5 +351,32 @@ def main():
       
       break_cipher(cyphertext, FREQUENCY_ALPHABET_PORTUGUESE if language_user_option == 'S' else FREQUENCY_ALPHABET_ENGLISH)
 
+def get_index_of_coincidence(alphabet_keyword_frequency):
+  
+  average_index_of_coincidence = 0
+  for frequency in alphabet_keyword_frequency:
+    index_of_coincidence = {key: round((frequency[key]/100)**2, 3) for key in frequency}
+    average_index_of_coincidence += sum(index_of_coincidence.values())
+
+  return average_index_of_coincidence / len(alphabet_keyword_frequency)
+
+def get_keyword_length(cyphertext, index_of_coincidence_language):
+    sequence_frequency = map_sequence_frequency(cyphertext, SEQUENCE_LENGTH)
+    possible_keys = map_possible_keys(sequence_frequency)
+
+    possible_index_of_coincidence = []
+    for key_length, _ in possible_keys:
+      alphabet_keyword_frequency = get_cyphertext_frequency_alphabet(cyphertext, key_length)
+      possible_index_of_coincidence.append((key_length, get_index_of_coincidence(alphabet_keyword_frequency)))
+
+    possible_index_of_coincidence.sort(key = lambda x : abs(x[1] - index_of_coincidence_language))
+
+    print('Os tamanhos de chaves mais prováveis são:\n')
+    for key_length, index_of_coincidence in possible_index_of_coincidence[:10]:
+      print(f'{str(key_length).ljust(4)} {index_of_coincidence}')
+
+    print(f'\nTamanho de chave mais provável: {possible_index_of_coincidence[0][0]}')
+
 if __name__ == '__main__':
-  main()
+  # main()
+  get_keyword_length(get_example_text_portuguese(), INDEX_OF_COINCIDENCE_PORTUGUESE)
