@@ -197,6 +197,25 @@ def print_alphabets(frequency_alphabet, language_frequency_alphabet, shift=0):
     print(f'{frequency} {(str(round(frequency_alphabet[frequency], 2))).ljust(5)} {(str(round(language_frequency_alphabet[letter_with_shift], 2))).ljust(5)}')
   print()
 
+def get_current_shift(frequency_alphabet, language_frequency_alphabet):
+  min_shift = -1
+  diff_min_shift = 10**9
+
+  for current_shift in range(0, ALPHABET_LENGTH):
+    # testa esse current_shift
+    diff_current_shift = 0
+
+    for frequency in frequency_alphabet:
+      letter_with_shift = chr(((ord(frequency) - ASCII_LETTER_A_LOWERCASE) + current_shift) % 26 + ASCII_LETTER_A_LOWERCASE)
+
+      diff_current_shift += abs(frequency_alphabet[frequency] - language_frequency_alphabet[letter_with_shift])
+
+    if diff_current_shift < diff_min_shift:
+      diff_min_shift = diff_current_shift
+      min_shift = current_shift
+  
+  return min_shift
+
 def break_cipher(cyphertext, language_frequency_alphabet):
   cyphertext = cyphertext.lower().replace(';', '')
 
@@ -213,16 +232,13 @@ def break_cipher(cyphertext, language_frequency_alphabet):
   alphabet_shift = []
 
   for frequency_alphabet in cyphertext_frequency_alphabet:
-    print_alphabets(frequency_alphabet, language_frequency_alphabet)
-    
-    letter1, letter2 = input('Digite duas letras correspondentes em ambas as colunas: ').split()
-    while not is_valid(letter1) or not is_valid(letter2):
-      letter1, letter2 = input('Por favor, digite duas letras válidas: ').split()
-    
-    current_shift = (ord(letter2) - ord(letter1)) % ALPHABET_LENGTH
+    current_shift = 0
 
-    # valida com o usuário se essa escolha está certa
+    # calcula um current_shift automático
+    current_shift = get_current_shift(frequency_alphabet, language_frequency_alphabet)
+    
     print_alphabets(frequency_alphabet, language_frequency_alphabet, current_shift)
+    
     user_choose = input('Está correto? (S/N) ').upper()
 
     while user_choose != 'S':
