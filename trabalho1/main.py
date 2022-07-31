@@ -1,3 +1,6 @@
+from hashlib import new
+
+
 ASCII_LETTER_A_LOWERCASE = 97 # OFFSET
 ALPHABET_LENGTH = 26
 
@@ -241,7 +244,7 @@ def break_cipher(cyphertext, language_frequency_alphabet):
 
     user_choose = input('Está correto? (S/N) ').upper()
 
-    while user_choose != 'S':
+    while user_choose not in ['S', '']:
       letter1, letter2 = input('Digite duas letras correspondentes em ambas as colunas: ').split()
       while not is_valid(letter1) or not is_valid(letter2):
         letter1, letter2 = input('Por favor, digite duas letras válidas: ').split()
@@ -256,13 +259,25 @@ def break_cipher(cyphertext, language_frequency_alphabet):
 
     print()
 
+  generated_key = ''
+
   cyphertext = list(cyphertext)
   for i in range(key_length):
+    old_letter = cyphertext[i]
+
     for j in range(i, len(cyphertext), key_length):
       cyphertext[j] = chr(((ord(cyphertext[j]) - ASCII_LETTER_A_LOWERCASE + alphabet_shift[i]) % ALPHABET_LENGTH) + ASCII_LETTER_A_LOWERCASE)
 
+    new_letter = cyphertext[i]
+
+    for alphabet_letter in ALPHABET:
+      if decryptography_letter(old_letter, alphabet_letter) == new_letter:
+        generated_key += alphabet_letter
+        break
+
   print(''.join(cyphertext))
-  # ANOTAR NO RELATÓRIO: se o texto tivesse espaçamento e caracteres não criptografdos, isso facilitaria para quem está vendo...
+
+  print(f'\nChave utilizada: {generated_key}')
 
 def get_example_text_english():
   arquivo = open('little_prince_english.txt', 'r')
@@ -327,22 +342,28 @@ def main():
       print('2 - Utilizar texto de exemplo 2 (Pequeno Príncipe em português)')
       print('\n0 - Texto personalizado\n')
 
+      key = 'chaves'
+
       break_cipher_user_input = input('Escolha uma das opções: ')
       while break_cipher_user_input not in ['0', '1', '2']:
         break_cipher_user_input = input('Opção inválida! Escolha uma das opções: ')
       
       cyphertext = ''
+      language_user_option = ''
 
       if break_cipher_user_input == '0':
         cyphertext = input('Digite o texto criptografdo: ')
+
+        language_user_option = input('O texto está em português? (S/N) ').upper() # porutugês ou inglês      
       elif break_cipher_user_input == '1':
-        cyphertext = example_text1
+        cyphertext = cryptography(example_text1, key)
+        language_user_option = 'S'
       elif break_cipher_user_input == '2':
-        cyphertext = example_text2
+        cyphertext = cryptography(example_text2, key)
+        language_user_option = 'N'
       
-      language_user_option = input('O texto está em português? (S/N) ').upper() # porutugês ou inglês
       
-      break_cipher(cyphertext, FREQUENCY_ALPHABET_PORTUGUESE if language_user_option == 'S' else FREQUENCY_ALPHABET_ENGLISH)
+      break_cipher(cyphertext, FREQUENCY_ALPHABET_PORTUGUESE if language_user_option in ['S', ''] else FREQUENCY_ALPHABET_ENGLISH)
 
 if __name__ == '__main__':
   main()
