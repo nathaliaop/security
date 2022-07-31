@@ -130,14 +130,6 @@ def decryptography(cyphertext, key):
   return decypheredtext
 
 
-def test(plaintext, key):
-  cyphertext = cryptography(plaintext, key)
-  decypheredtext = decryptography(cyphertext, key)
-
-  print(cyphertext)
-  print(decypheredtext)
-
-
 def map_sequence_frequency(cyphertext, sequence_length):
   sequence_frequency = {}
   for i in range(len(cyphertext) - sequence_length):
@@ -195,7 +187,17 @@ def get_cyphertext_frequency_alphabet(cyphertext, key_length):
 
   return percentage
 
-def break_cipher(cyphertext):
+def is_valid(letter):
+  return letter in ALPHABET
+
+def print_alphabets(frequency_alphabet, language_frequency_alphabet, shift=0):
+  for frequency in frequency_alphabet:
+    letter_with_shift = chr(((ord(frequency) - ASCII_LETTER_A_LOWERCASE) + shift) % 26 + ASCII_LETTER_A_LOWERCASE)
+    
+    print(f'{frequency} {(str(round(frequency_alphabet[frequency], 2))).ljust(5)} {(str(round(language_frequency_alphabet[letter_with_shift], 2))).ljust(5)}')
+  print()
+
+def break_cipher(cyphertext, language_frequency_alphabet):
   cyphertext = cyphertext.lower().replace(';', '')
 
   sequence_frequency = map_sequence_frequency(cyphertext, SEQUENCE_LENGTH)
@@ -207,31 +209,44 @@ def break_cipher(cyphertext):
 
   cyphertext_frequency_alphabet = get_cyphertext_frequency_alphabet(cyphertext, key_length)
   
-  for e in cyphertext_frequency_alphabet:
-    print(e)
-    print()
+  # alphabet_shift = [5, 18, 24, 7, 12, 9]
+  alphabet_shift = []
 
-  alphabet_shift = [5, 18, 24, 7, 12, 9]
+  for frequency_alphabet in cyphertext_frequency_alphabet:
+    print_alphabets(frequency_alphabet, language_frequency_alphabet)
+    
+    letter1, letter2 = input('Digite duas letras correspondentes em ambas as colunas: ').split()
+    while not is_valid(letter1) or not is_valid(letter2):
+      letter1, letter2 = input('Por favor, digite duas letras válidas: ').split()
+    
+    current_shift = (ord(letter2) - ord(letter1)) % ALPHABET_LENGTH
+
+    # valida com o usuário se essa escolha está certa
+    print_alphabets(frequency_alphabet, language_frequency_alphabet, current_shift)
+    user_choose = input('Está correto? (S/N) ').upper()
+
+    while user_choose != 'S':
+      letter1, letter2 = input('Digite duas letras correspondentes em ambas as colunas: ').split()
+      while not is_valid(letter1) or not is_valid(letter2):
+        letter1, letter2 = input('Por favor, digite duas letras válidas: ').split()
+      
+      current_shift = (ord(letter2) - ord(letter1) + current_shift) % ALPHABET_LENGTH
+
+      print_alphabets(frequency_alphabet, language_frequency_alphabet, current_shift)
+
+      user_choose = input('Está correto? (S/N) ').upper()
+
+    alphabet_shift.append(current_shift)
+
+    print()
 
   cyphertext = list(cyphertext)
   for i in range(key_length):
     for j in range(i, len(cyphertext), key_length):
       cyphertext[j] = chr(((ord(cyphertext[j]) - ASCII_LETTER_A_LOWERCASE + alphabet_shift[i]) % ALPHABET_LENGTH) + ASCII_LETTER_A_LOWERCASE)
 
-  # print(''.join(cyphertext))
-
+  print(''.join(cyphertext))
   # ANOTAR NO RELATÓRIO: se o texto tivesse espaçamento e caracteres não criptografdos, isso facilitaria para quem está vendo...
-
-def tmp():
-  s = ''
-
-  while True:
-    try:
-      s += input()
-    except:
-      break
-  
-  return s
 
 def get_example_text_english():
   arquivo = open('little_prince_english.txt', 'r')
@@ -266,17 +281,15 @@ def get_example_text_portuguese():
   return cleaned_text
 
 def main():
-  # test('victorchato', 'nathalialegal')
-  # break_cipher('iivaockhlxu')
   cleaned_text = get_example_text_english()
   cleaned_text = get_example_text_portuguese()
 
-  #print(cleaned_text)
+  # print(cleaned_text[:100])
+  # print(cryptography(cleaned_text, 'victor')[:100])
 
-  print(cleaned_text[:100])
-  print(cryptography(cleaned_text, 'victor')[:100])
+  break_cipher(cryptography(cleaned_text, 'victor'), FREQUENCY_ALPHABET_PORTUGUESE)
 
-  break_cipher(cryptography(cleaned_text, 'victor'))
+  
 
 if __name__ == '__main__':
   main()
