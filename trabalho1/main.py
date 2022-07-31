@@ -238,7 +238,7 @@ def break_cipher(cyphertext, language_frequency_alphabet):
     current_shift = get_current_shift(frequency_alphabet, language_frequency_alphabet)
     
     print_alphabets(frequency_alphabet, language_frequency_alphabet, current_shift)
-    
+
     user_choose = input('Está correto? (S/N) ').upper()
 
     while user_choose != 'S':
@@ -297,15 +297,52 @@ def get_example_text_portuguese():
   return cleaned_text
 
 def main():
-  cleaned_text = get_example_text_english()
-  cleaned_text = get_example_text_portuguese()
+  example_text1 = get_example_text_english()
+  example_text2 = get_example_text_portuguese()
 
-  # print(cleaned_text[:100])
-  # print(cryptography(cleaned_text, 'victor')[:100])
+  while True:
+    print('\n1 - Cifrar texto')
+    print('2 - Decifrar texto')
+    print('3 - Quebrar cifra')
+    print('\n0 - Sair')
 
-  break_cipher(cryptography(cleaned_text, 'victor'), FREQUENCY_ALPHABET_PORTUGUESE)
+    user_input = input('\nEscolha uma das opções: ')
+    while user_input not in ['0','1', '2', '3']:
+      user_input = input('Opção inexistente! Escolha uma das opções: ')
+    
+    if user_input == '0':
+      break
+    elif user_input == '1':
+      plaintext = input('Digite o texto: ')
+      key = input('Digite a chave: ')
 
-  
+      print(f'\nTexto criptografado: {cryptography(cyphertext, key)}')
+    elif user_input == '2':
+      cyphertext = input('Digite o texto criptografado: ')
+      key = input('Digite a chave: ')
+      
+      print(f'\nTexto decriptografado: {decryptography(cyphertext, key)}')
+    elif user_input == '3':
+      print('1 - Utilizar texto de exemplo 1 (Pequeno Príncipe em inglês)')
+      print('2 - Utilizar texto de exemplo 2 (Pequeno Príncipe em português)')
+      print('\n0 - Texto personalizado\n')
+
+      break_cipher_user_input = input('Escolha uma das opções: ')
+      while break_cipher_user_input not in ['0', '1', '2']:
+        break_cipher_user_input = input('Opção inválida! Escolha uma das opções: ')
+      
+      cyphertext = ''
+
+      if break_cipher_user_input == '0':
+        cyphertext = input('Digite o texto criptografdo: ')
+      elif break_cipher_user_input == '1':
+        cyphertext = example_text1
+      elif break_cipher_user_input == '2':
+        cyphertext = example_text2
+      
+      language_user_option = input('O texto está em português? (S/N) ').upper() # porutugês ou inglês
+      
+      break_cipher(cyphertext, FREQUENCY_ALPHABET_PORTUGUESE if language_user_option == 'S' else FREQUENCY_ALPHABET_ENGLISH)
 
 if __name__ == '__main__':
   main()
