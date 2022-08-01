@@ -4,7 +4,7 @@ ALPHABET_LENGTH = 26
 SEQUENCE_LENGTH = 3
 
 INDEX_OF_COINCIDENCE_ENGLISH = 0.066833
-INDEX_OF_COINCIDENCE_PORTUGUESE = 0.077833
+INDEX_OF_COINCIDENCE_PORTUGUESE = 0.077833 # 0.072723
 
 DECIMAL_PLACES = 6
 
@@ -294,12 +294,12 @@ def clean_text(text):
   return cleaned_text
 
 def get_example_text_english():
-  arquivo = open('little_prince_english.txt', 'r')
-
+  arquivo = open('little_prince_english.txt', 'r', encoding='utf8')
+  
   text = ''.join(arquivo.readlines())
 
   arquivo.close()
-
+  
   return clean_text(text)
 
 def get_example_text_portuguese():
@@ -342,7 +342,7 @@ def main():
       print('2 - Utilizar texto de exemplo 2 (Pequeno Príncipe em português)')
       print('\n0 - Texto personalizado\n')
 
-      key = clean_text('nathaliaevictor')
+      key = clean_text('chave')
 
       break_cipher_user_input = input('Escolha uma das opções: ')
       while break_cipher_user_input not in ['0', '1', '2']:
