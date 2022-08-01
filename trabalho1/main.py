@@ -1,10 +1,12 @@
-from hashlib import new
-
-
 ASCII_LETTER_A_LOWERCASE = 97 # OFFSET
 ALPHABET_LENGTH = 26
 
 SEQUENCE_LENGTH = 3
+
+INDEX_OF_COINCIDENCE_ENGLISH = 0.066833
+INDEX_OF_COINCIDENCE_PORTUGUESE = 0.077833
+
+DECIMAL_PLACES = 6
 
 ALPHABET = [chr(letter) for letter in range(97, 97+26)]
 
@@ -156,8 +158,6 @@ def fator_number(num):
 
     i += 1
 
-  factors.remove(1)
-
   return factors
 
 def map_possible_keys(sequence_frequency):
@@ -219,19 +219,23 @@ def get_current_shift(frequency_alphabet, language_frequency_alphabet):
   
   return min_shift
 
-def break_cipher(cyphertext, language_frequency_alphabet):
+def break_cipher(cyphertext, cyphertext_language):
   cyphertext = cyphertext.lower().replace(';', '')
+  
+  language_frequency_alphabet = FREQUENCY_ALPHABET_PORTUGUESE if cyphertext_language == 'PORTUGUESE' else FREQUENCY_ALPHABET_ENGLISH
+  index_of_coincidence = INDEX_OF_COINCIDENCE_PORTUGUESE if cyphertext_language == 'PORTUGUESE' else INDEX_OF_COINCIDENCE_ENGLISH
 
-  sequence_frequency = map_sequence_frequency(cyphertext, SEQUENCE_LENGTH)
-  possible_keys = map_possible_keys(sequence_frequency)
-
-  print(possible_keys)
-
-  key_length = 6
+  get_keyword_length(cyphertext, index_of_coincidence)
+  key_length = input('\nDigite o tamanho da chave: ')
+  while True:
+    try:
+      key_length = int(key_length)
+      break
+    except:
+      key_length = input('Digite um tamanho de chave válido: ')
 
   cyphertext_frequency_alphabet = get_cyphertext_frequency_alphabet(cyphertext, key_length)
   
-  # alphabet_shift = [5, 18, 24, 7, 12, 9]
   alphabet_shift = []
 
   for frequency_alphabet in cyphertext_frequency_alphabet:
@@ -331,7 +335,7 @@ def main():
       plaintext = input('Digite o texto: ')
       key = input('Digite a chave: ')
 
-      print(f'\nTexto criptografado: {cryptography(cyphertext, key)}')
+      print(f'\nTexto criptografado: {cryptography(plaintext, key)}')
     elif user_input == '2':
       cyphertext = input('Digite o texto criptografado: ')
       key = input('Digite a chave: ')
@@ -342,7 +346,7 @@ def main():
       print('2 - Utilizar texto de exemplo 2 (Pequeno Príncipe em português)')
       print('\n0 - Texto personalizado\n')
 
-      key = 'chaves'
+      key = 'nathaliaevictor'
 
       break_cipher_user_input = input('Escolha uma das opções: ')
       while break_cipher_user_input not in ['0', '1', '2']:
@@ -357,13 +361,38 @@ def main():
         language_user_option = input('O texto está em português? (S/N) ').upper() # porutugês ou inglês      
       elif break_cipher_user_input == '1':
         cyphertext = cryptography(example_text1, key)
-        language_user_option = 'S'
+        language_user_option = 'PORTUGUESE'
       elif break_cipher_user_input == '2':
         cyphertext = cryptography(example_text2, key)
-        language_user_option = 'N'
+        language_user_option = 'ENGLISH'
       
-      
-      break_cipher(cyphertext, FREQUENCY_ALPHABET_PORTUGUESE if language_user_option in ['S', ''] else FREQUENCY_ALPHABET_ENGLISH)
+      break_cipher(cyphertext, 'PORTUGUESE' if language_user_option in ['S', ''] else 'ENGLISH')
+
+def get_index_of_coincidence(alphabet_keyword_frequency):
+  
+  average_index_of_coincidence = 0
+  for frequency in alphabet_keyword_frequency:
+    index_of_coincidence = {key: round((frequency[key]/100)**2, DECIMAL_PLACES) for key in frequency}
+    average_index_of_coincidence += sum(index_of_coincidence.values())
+
+  return average_index_of_coincidence / len(alphabet_keyword_frequency)
+
+def get_keyword_length(cyphertext, index_of_coincidence_language):
+    sequence_frequency = map_sequence_frequency(cyphertext, SEQUENCE_LENGTH)
+    possible_keys = map_possible_keys(sequence_frequency)
+    
+    possible_index_of_coincidence = []
+    for key_length, _ in possible_keys:
+      alphabet_keyword_frequency = get_cyphertext_frequency_alphabet(cyphertext, key_length)
+      possible_index_of_coincidence.append((key_length, get_index_of_coincidence(alphabet_keyword_frequency)))
+
+    possible_index_of_coincidence.sort(key = lambda x : abs(round(x[1], DECIMAL_PLACES) - round(index_of_coincidence_language, DECIMAL_PLACES)))
+
+    print('Os tamanhos de chaves mais prováveis são:\n')
+    for key_length, index_of_coincidence in possible_index_of_coincidence[:20]:
+      print(f'{str(key_length).ljust(4)} {index_of_coincidence}')
+
+    print(f'\nTamanho de chave mais provável: {possible_index_of_coincidence[0][0]}')
 
 if __name__ == '__main__':
   main()
