@@ -4,3 +4,6 @@
 - [ ] Tamanho da chave
 - [ ] explicar como algoritmo funciona
 - [ ] calcular o índice de coincidência com alfabet oem uma função (não acho que funciona)
+
+tem que testar até 15 pq quanto mais mais possibilidades
+errada pro ingles

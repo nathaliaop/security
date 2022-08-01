@@ -3,7 +3,7 @@ ALPHABET_LENGTH = 26
 
 SEQUENCE_LENGTH = 3
 
-INDEX_OF_COINCIDENCE_ENGLISH = 0.066833
+INDEX_OF_COINCIDENCE_ENGLISH = 0.06866 # 0.066833
 INDEX_OF_COINCIDENCE_PORTUGUESE = 0.077833 # 0.072723
 
 DECIMAL_PLACES = 6
@@ -378,7 +378,7 @@ def get_keyword_length(cyphertext, index_of_coincidence_language):
     possible_keys = map_possible_keys(sequence_frequency)
     
     possible_index_of_coincidence = []
-    for key_length, _ in possible_keys:
+    for key_length in range(1, 10):
       alphabet_keyword_frequency = get_cyphertext_frequency_alphabet(cyphertext, key_length)
       possible_index_of_coincidence.append((key_length, get_index_of_coincidence(alphabet_keyword_frequency)))
 
