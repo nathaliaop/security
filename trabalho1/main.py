@@ -283,6 +283,16 @@ def break_cipher(cyphertext, cyphertext_language):
 
   print(f'\nChave utilizada: {generated_key}')
 
+def clean_text(text):
+  cleaned_text = ''
+  for c in text.lower():
+    if c in ALPHABET:
+      cleaned_text += c
+    elif c in PORTUGUESE_LETTERS_WITH_ACCENT:
+      cleaned_text += PORTUGUESE_LETTERS_WITH_ACCENT[c]
+    
+  return cleaned_text
+
 def get_example_text_english():
   arquivo = open('little_prince_english.txt', 'r')
 
@@ -290,14 +300,7 @@ def get_example_text_english():
 
   arquivo.close()
 
-  cleaned_text = ''
-  for c in text.lower():
-    if c in ALPHABET:
-      cleaned_text += c
-    elif c in PORTUGUESE_LETTERS_WITH_ACCENT:
-      cleaned_text += PORTUGUESE_LETTERS_WITH_ACCENT[c]
-
-  return cleaned_text
+  return clean_text(text)
 
 def get_example_text_portuguese():
   arquivo = open('pequeno_principe_português.txt', 'r', encoding='utf8')
@@ -306,14 +309,7 @@ def get_example_text_portuguese():
   
   arquivo.close()
 
-  cleaned_text = ''
-  for c in text.lower():
-    if c in ALPHABET:
-      cleaned_text += c
-    elif c in PORTUGUESE_LETTERS_WITH_ACCENT:
-      cleaned_text += PORTUGUESE_LETTERS_WITH_ACCENT[c]
-
-  return cleaned_text
+  return clean_text(text)
 
 def main():
   example_text1 = get_example_text_english()
@@ -335,18 +331,18 @@ def main():
       plaintext = input('Digite o texto: ')
       key = input('Digite a chave: ')
 
-      print(f'\nTexto criptografado: {cryptography(plaintext, key)}')
+      print(f'\nTexto criptografado: {cryptography(clean_text(plaintext), clean_text(key))}')
     elif user_input == '2':
       cyphertext = input('Digite o texto criptografado: ')
       key = input('Digite a chave: ')
       
-      print(f'\nTexto decriptografado: {decryptography(cyphertext, key)}')
+      print(f'\nTexto decriptografado: {decryptography(clean_text(cyphertext), clean_text(key))}')
     elif user_input == '3':
       print('1 - Utilizar texto de exemplo 1 (Pequeno Príncipe em inglês)')
       print('2 - Utilizar texto de exemplo 2 (Pequeno Príncipe em português)')
       print('\n0 - Texto personalizado\n')
 
-      key = 'nathaliaevictor'
+      key = clean_text('nathaliaevictor')
 
       break_cipher_user_input = input('Escolha uma das opções: ')
       while break_cipher_user_input not in ['0', '1', '2']:
@@ -356,7 +352,7 @@ def main():
       language_user_option = ''
 
       if break_cipher_user_input == '0':
-        cyphertext = input('Digite o texto criptografdo: ')
+        cyphertext = input('Digite o texto criptografado: ')
 
         language_user_option = input('O texto está em português? (S/N) ').upper() # porutugês ou inglês      
       elif break_cipher_user_input == '1':
@@ -366,7 +362,7 @@ def main():
         cyphertext = cryptography(example_text2, key)
         language_user_option = 'ENGLISH'
       
-      break_cipher(cyphertext, 'PORTUGUESE' if language_user_option in ['S', ''] else 'ENGLISH')
+      break_cipher(clean_text(cyphertext), 'PORTUGUESE' if language_user_option in ['S', ''] else 'ENGLISH')
 
 def get_index_of_coincidence(alphabet_keyword_frequency):
   
